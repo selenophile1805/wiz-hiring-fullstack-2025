@@ -1,10 +1,15 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from routes import events, bookings
 
 
 app = FastAPI(
     title="BookMySlot API"
 )
+
+
+app.include_router(events.router)
+app.include_router(bookings.router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -25,6 +30,8 @@ async def root():
     }
 
 
+
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True) 
+    uvicorn.run(app, host="0.0.0.0", port=8085) 
