@@ -24,9 +24,10 @@ app.add_middleware(
 async def root():
     """Root endpoint"""
     return {
-        "message": "Welcome to BookMySlot API",
-        "version": "1.0.0",
-        "docs": "/docs"
+        "message": "Welcome to BookMySlot's Backend this is Chetan's Submission",
+        "frontend": "https://chetansubmission.up.railway.app/",
+        "docs": "https://chetan-backend.up.railway.app/docs"
+
     }
 
 
