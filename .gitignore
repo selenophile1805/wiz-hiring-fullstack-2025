@@ -4,3 +4,7 @@ __pycache__/
 backend/.env
 .DS_Store
 backend/.DS_Store
+
+frontend/.DS_Store
+frontend/package-lock.json
+frontend/node_modules
