@@ -18,12 +18,14 @@ class BookingService:
                 return BookingResponse(success=False, message="Time slot not found.")
             
             slot = slot_result.data
-            if len(slot.get("bookings", [])) >= slot["max_bookings"]:
+            current_bookings = len(slot.get("bookings", []))
+            
+            if current_bookings >= slot["max_bookings"]:
                 return BookingResponse(success=False, message="This time slot is completely booked.")
             
             existing_booking_check = supabase.table("bookings").select("id").eq("time_slot_id", booking_data.time_slot_id).eq("attendee_email", booking_data.attendee_email).execute()
             if existing_booking_check.data:
-                return BookingResponse(success=False, message="You have already booked this time slot.")
+                raise ValueError("You have already booked this time slot.")
             
             booking_to_create = {
                 "id": str(uuid.uuid4()),
@@ -34,6 +36,10 @@ class BookingService:
                 "created_at": datetime.utcnow().isoformat()
             }
             new_booking_result = supabase.table("bookings").insert(booking_to_create).execute()
+            
+            
+            new_current_bookings = current_bookings + 1
+            supabase.table("time_slots").update({"current_bookings": new_current_bookings}).eq("id", booking_data.time_slot_id).execute()
             
             event_result = supabase.table("events").select("title").eq("id", booking_data.event_id).single().execute()
 
@@ -83,8 +89,28 @@ class BookingService:
     async def cancel_booking(booking_id: str, attendee_email: str) -> bool:
         """Cancel a booking, ensuring the request comes from the booking owner."""
         try:
+            
+            booking_result = supabase.table("bookings").select("time_slot_id").eq("id", booking_id).eq("attendee_email", attendee_email).single().execute()
+            
+            if not booking_result.data:
+                return False
+            
+            time_slot_id = booking_result.data["time_slot_id"]
+            
+            
             result = supabase.table("bookings").delete().eq("id", booking_id).eq("attendee_email", attendee_email).execute()
-            return len(result.data) > 0
+            
+            if len(result.data) > 0:
+                
+                slot_result = supabase.table("time_slots").select("current_bookings").eq("id", time_slot_id).single().execute()
+                if slot_result.data:
+                    current_bookings = slot_result.data["current_bookings"]
+                    new_current_bookings = max(0, current_bookings - 1)
+                    supabase.table("time_slots").update({"current_bookings": new_current_bookings}).eq("id", time_slot_id).execute()
+                
+                return True
+            
+            return False
         except Exception as e:
             logger.error(f"Error canceling booking: {e}")
             raise 

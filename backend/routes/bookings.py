@@ -13,6 +13,8 @@ async def create_new_booking(booking_data: BookingCreate):
         if not booking_response.success:
             raise HTTPException(status_code=400, detail=booking_response.message)
         return booking_response
+    except ValueError as e:
+        raise HTTPException(status_code=409, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

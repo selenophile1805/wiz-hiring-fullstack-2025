@@ -26,6 +26,12 @@ async def get_all_events():
     events = await EventService.get_all_events()
     return events
 
+@router.get("/with-slots", response_model=List[EventWithSlots])
+async def get_all_events_with_slots():
+    """Get all events with their time slots for availability calculation"""
+    events = await EventService.get_all_events_with_slots()
+    return events
+
 @router.get("/{event_id}", response_model=EventWithSlots)
 async def get_event_by_id(event_id: str):
     """Get event by ID with time slots"""

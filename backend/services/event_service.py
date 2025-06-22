@@ -57,6 +57,34 @@ class EventService:
             raise
     
     @staticmethod
+    async def get_all_events_with_slots() -> List[EventWithSlots]:
+        """Get all events with their time slots for availability calculation"""
+        try:
+            result = supabase.table("events").select(
+                "*, time_slots(*, bookings(*))"
+            ).order("created_at", desc=True).execute()
+            
+            # Update current_bookings for each time slot to match actual booking count
+            for event in result.data:
+                for time_slot in event.get("time_slots", []):
+                    actual_bookings_count = len(time_slot.get("bookings", []))
+                    stored_bookings_count = time_slot.get("current_bookings", 0)
+                    
+                    # Update the database if there's a mismatch
+                    if actual_bookings_count != stored_bookings_count:
+                        supabase.table("time_slots").update({
+                            "current_bookings": actual_bookings_count
+                        }).eq("id", time_slot["id"]).execute()
+                        
+                        # Update the returned data
+                        time_slot["current_bookings"] = actual_bookings_count
+            
+            return [EventWithSlots(**event) for event in result.data]
+        except Exception as e:
+            logger.error(f"Error in get_all_events_with_slots: {e}")
+            raise
+    
+    @staticmethod
     async def get_event_by_id(event_id: str) -> Optional[EventWithSlots]:
         """Get event by ID with its time slots and their bookings"""
         try:
@@ -66,6 +94,20 @@ class EventService:
 
             if not result.data:
                 return None
+            
+            # Update current_bookings for each time slot to match actual booking count
+            for time_slot in result.data.get("time_slots", []):
+                actual_bookings_count = len(time_slot.get("bookings", []))
+                stored_bookings_count = time_slot.get("current_bookings", 0)
+                
+                # Update the database if there's a mismatch
+                if actual_bookings_count != stored_bookings_count:
+                    supabase.table("time_slots").update({
+                        "current_bookings": actual_bookings_count
+                    }).eq("id", time_slot["id"]).execute()
+                    
+                    # Update the returned data
+                    time_slot["current_bookings"] = actual_bookings_count
             
             return EventWithSlots(**result.data)
         except Exception as e:
