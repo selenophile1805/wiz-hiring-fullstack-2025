@@ -19,7 +19,6 @@ const HomePage = () => {
     setError(null);
     
     try {
-      // Get all events with their time slots and booking data
       const eventsData = await getEventsWithSlots();
       setEvents(eventsData);
     } catch (error) {
@@ -71,7 +70,6 @@ const HomePage = () => {
       )}
       
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             Book My Slot
@@ -87,7 +85,6 @@ const HomePage = () => {
           </Link>
         </div>
 
-        {/* Events Section */}
         <div>
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-gray-900">

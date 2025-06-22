@@ -117,7 +117,6 @@ const CreateEventPage = () => {
       )}
       
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Create New Event
@@ -127,9 +126,7 @@ const CreateEventPage = () => {
           </p>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Event Details */}
           <div className="card">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
               Event Details
@@ -196,13 +193,11 @@ const CreateEventPage = () => {
             </div>
           </div>
 
-          {/* Time Slots */}
           <div className="card">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
               Time Slots
             </h2>
 
-            {/* Add New Slot */}
             <div className="border border-gray-200 rounded-lg p-4 mb-4">
               <h3 className="text-lg font-medium text-gray-900 mb-3">
                 Add New Time Slot
@@ -258,7 +253,6 @@ const CreateEventPage = () => {
               </button>
             </div>
 
-            {/* Existing Slots */}
             {formData.time_slots.length > 0 && (
               <div>
                 <h3 className="text-lg font-medium text-gray-900 mb-3">
@@ -289,7 +283,6 @@ const CreateEventPage = () => {
               </div>
             )}
 
-            {/* No slots warning */}
             {formData.time_slots.length === 0 && (
               <div className="text-center py-4 text-gray-500">
                 <p>Add at least one time slot to create your event</p>
@@ -297,7 +290,6 @@ const CreateEventPage = () => {
             )}
           </div>
 
-          {/* Submit Button */}
           <div className="flex justify-end space-x-4">
             <button
               type="button"

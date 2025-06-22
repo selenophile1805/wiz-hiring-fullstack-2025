@@ -11,7 +11,6 @@ class EventService:
     
     @staticmethod
     async def create_event(event_data: EventCreate, time_slots: List[TimeSlotCreate]) -> EventWithSlots:
-        """Create a new event with time slots"""
         try:
             event_id = str(uuid.uuid4())
             current_time = datetime.utcnow()
@@ -48,7 +47,6 @@ class EventService:
     
     @staticmethod
     async def get_all_events() -> List[Event]:
-        """Get all events (basic info)"""
         try:
             result = supabase.table("events").select("*").order("created_at", desc=True).execute()
             return [Event(**event) for event in result.data]
@@ -58,25 +56,21 @@ class EventService:
     
     @staticmethod
     async def get_all_events_with_slots() -> List[EventWithSlots]:
-        """Get all events with their time slots for availability calculation"""
         try:
             result = supabase.table("events").select(
                 "*, time_slots(*, bookings(*))"
             ).order("created_at", desc=True).execute()
             
-            # Update current_bookings for each time slot to match actual booking count
             for event in result.data:
                 for time_slot in event.get("time_slots", []):
                     actual_bookings_count = len(time_slot.get("bookings", []))
                     stored_bookings_count = time_slot.get("current_bookings", 0)
                     
-                    # Update the database if there's a mismatch
                     if actual_bookings_count != stored_bookings_count:
                         supabase.table("time_slots").update({
                             "current_bookings": actual_bookings_count
                         }).eq("id", time_slot["id"]).execute()
                         
-                        # Update the returned data
                         time_slot["current_bookings"] = actual_bookings_count
             
             return [EventWithSlots(**event) for event in result.data]
@@ -86,7 +80,6 @@ class EventService:
     
     @staticmethod
     async def get_event_by_id(event_id: str) -> Optional[EventWithSlots]:
-        """Get event by ID with its time slots and their bookings"""
         try:
             result = supabase.table("events").select(
                 "*, time_slots(*, bookings(*))"
@@ -95,18 +88,15 @@ class EventService:
             if not result.data:
                 return None
             
-            # Update current_bookings for each time slot to match actual booking count
             for time_slot in result.data.get("time_slots", []):
                 actual_bookings_count = len(time_slot.get("bookings", []))
                 stored_bookings_count = time_slot.get("current_bookings", 0)
                 
-                # Update the database if there's a mismatch
                 if actual_bookings_count != stored_bookings_count:
                     supabase.table("time_slots").update({
                         "current_bookings": actual_bookings_count
                     }).eq("id", time_slot["id"]).execute()
                     
-                    # Update the returned data
                     time_slot["current_bookings"] = actual_bookings_count
             
             return EventWithSlots(**result.data)
@@ -116,7 +106,6 @@ class EventService:
     
     @staticmethod
     async def update_event(event_id: str, event_data: dict) -> Optional[Event]:
-        """Update an event"""
         try:
             event_data["updated_at"] = datetime.utcnow().isoformat()
             result = supabase.table("events").update(event_data).eq("id", event_id).execute()
@@ -131,7 +120,6 @@ class EventService:
     
     @staticmethod
     async def delete_event(event_id: str) -> bool:
-        """Delete an event and its time slots"""
         try:
             supabase.table("time_slots").delete().eq("event_id", event_id).execute()
             result = supabase.table("events").delete().eq("id", event_id).execute()

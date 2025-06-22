@@ -11,6 +11,7 @@ app = FastAPI(
 app.include_router(events.router)
 app.include_router(bookings.router)
 
+# Allowing all origins for development and demo purposes
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  
@@ -22,7 +23,6 @@ app.add_middleware(
 
 @app.get("/")
 async def root():
-    """Root endpoint"""
     return {
         "message": "Welcome to BookMySlot's Backend this is Chetan's Submission",
         "frontend": "https://chetansubmission.up.railway.app/",

@@ -11,7 +11,6 @@ class BookingService:
     
     @staticmethod
     async def create_booking(booking_data: BookingCreate) -> BookingResponse:
-        """Create a new booking after validating slot availability."""
         try:
             slot_result = supabase.table("time_slots").select("*, bookings(id)").eq("id", booking_data.time_slot_id).single().execute()
             if not slot_result.data:
@@ -37,7 +36,6 @@ class BookingService:
             }
             new_booking_result = supabase.table("bookings").insert(booking_to_create).execute()
             
-            
             new_current_bookings = current_bookings + 1
             supabase.table("time_slots").update({"current_bookings": new_current_bookings}).eq("id", booking_data.time_slot_id).execute()
             
@@ -61,10 +59,6 @@ class BookingService:
     
     @staticmethod
     async def get_bookings_by_email(email: str) -> List[dict]:
-        """
-        Get all bookings for a user by email, correctly joining related
-        event and time_slot data using an explicit inner join.
-        """
         try:
             bookings_result = supabase.table("bookings").select(
                 "*, events!inner(*), time_slots!inner(*)"
@@ -77,7 +71,6 @@ class BookingService:
     
     @staticmethod
     async def get_bookings_by_event(event_id: str) -> List[Booking]:
-        """Get all bookings for a specific event."""
         try:
             result = supabase.table("bookings").select("*").eq("event_id", event_id).order("created_at", desc=True).execute()
             return [Booking(**b) for b in result.data]
@@ -87,9 +80,7 @@ class BookingService:
     
     @staticmethod
     async def cancel_booking(booking_id: str, attendee_email: str) -> bool:
-        """Cancel a booking, ensuring the request comes from the booking owner."""
         try:
-            
             booking_result = supabase.table("bookings").select("time_slot_id").eq("id", booking_id).eq("attendee_email", attendee_email).single().execute()
             
             if not booking_result.data:
@@ -97,11 +88,9 @@ class BookingService:
             
             time_slot_id = booking_result.data["time_slot_id"]
             
-            
             result = supabase.table("bookings").delete().eq("id", booking_id).eq("attendee_email", attendee_email).execute()
             
             if len(result.data) > 0:
-                
                 slot_result = supabase.table("time_slots").select("current_bookings").eq("id", time_slot_id).single().execute()
                 if slot_result.data:
                     current_bookings = slot_result.data["current_bookings"]

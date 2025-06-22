@@ -1,6 +1,5 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
-// Helper function to handle API responses
 const handleResponse = async (response) => {
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -10,7 +9,6 @@ const handleResponse = async (response) => {
     return response.json();
 };
 
-// Helper function to make API requests
 const apiRequest = async (endpoint, options = {}) => {
     try {
         const response = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -30,7 +28,6 @@ const apiRequest = async (endpoint, options = {}) => {
     }
 };
 
-// Event APIs
 export const getEvents = async () => {
     return apiRequest('/events/');
 };
@@ -50,7 +47,6 @@ export const createEvent = async (eventData) => {
     });
 };
 
-// Booking APIs
 export const createBooking = async (bookingData) => {
     return apiRequest('/bookings/', {
         method: 'POST',
@@ -68,7 +64,6 @@ export const cancelBooking = async (bookingId, attendeeEmail) => {
     });
 };
 
-// Health check
 export const healthAPI = {
     checkHealth: () => apiRequest('/health'),
 }; 
